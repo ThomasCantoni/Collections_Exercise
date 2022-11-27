@@ -28,7 +28,7 @@ typedef struct set_node
                                 //whenever i have to move it
     size_t key_len;             //4
     struct set_node* next;      //8 byte
-    enum Type ValueType;   
+    enum Type value_ype;   
     void* value;                //8 byte
 
 }set_node;
@@ -37,7 +37,7 @@ typedef struct set_table
 {
     struct set_node** nodes;
     size_t hashmap_size;
-    int CollisionCounter;
+    int collision_counter;
     
 } set_table;
 // size_t djb33x_hash(const char *key, const size_t keylen)
@@ -229,9 +229,9 @@ struct set_node *set_insert(struct set_table *table,  void *key, const size_t ke
         printf("\n Duplicate key detected!   %s \n " , (char*)key);
         return NULL;
     }
-    table->CollisionCounter ++;
+    table->collision_counter ++;
     printf("\nCOLLISION DETECTED AT INDEX %i !\n",(int)index);
-    printf("\nCOLLISION COUNTER : %i !\n\n",(int)table->CollisionCounter);
+    printf("\nCOLLISION COUNTER : %i !\n\n",(int)table->collision_counter);
 
 
     // if(&table->nodes[index])
@@ -251,7 +251,7 @@ struct set_node *set_insert(struct set_table *table,  void *key, const size_t ke
         
     // }
    // head = table->nodes[index];
-   if(head->next || table->CollisionCounter>(int)(table->hashmap_size*0.75))
+   if(head->next || table->collision_counter>(int)(table->hashmap_size*0.75))
    {
         printf("\nToo many collisions found in the dictionary, rehashing all entries\n");
         //table = rehash_all_entries(table);

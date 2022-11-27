@@ -46,4 +46,5 @@ int main (int argc,char** args)
     print_set(new_set);
     printf("\n");
 
+    printf("\nProgram executed succesfully");
 }

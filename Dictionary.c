@@ -7,7 +7,7 @@ set_node* DictionaryInsert(set_table* table, void* key,void* element,enum Type T
     set_node* dictionary_node = set_insert(table,key,num);
     printf("HHHHHHHHHHHHHaaaaaaaaHHHHHHHH%llu",table->hashmap_size);
     dictionary_node->value = element;
-    dictionary_node->ValueType = TypeOfValue;
+    dictionary_node->value_ype = TypeOfValue;
     return dictionary_node;
     
 }
@@ -16,7 +16,7 @@ void* DictionaryGetValue(set_table* table,void* key)
     set_node* found = search_by_key(table,key);
     if(found)
     {
-        enum Type type= found->ValueType;
+        enum Type type= found->value_ype;
         switch(type )
         {
             case Int:

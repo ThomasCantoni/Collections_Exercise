@@ -156,5 +156,6 @@ int main(int argc,char** args)
         printf("%s\n", string_item->string);
         string_item = (struct string_item_double *)string_item->node.next;
     }
+    printf("\nProgram executed succesfully");
     return 0;
 }

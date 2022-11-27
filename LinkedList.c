@@ -114,6 +114,6 @@ int main(int argc,char** args)
     
     PrintList(my_linked_list);
     
-    
+    printf("\nProgram executed succesfully");
     return 0;
 }
