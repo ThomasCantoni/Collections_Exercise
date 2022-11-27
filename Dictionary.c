@@ -5,7 +5,7 @@ set_node* DictionaryInsert(set_table* table, void* key,void* element,enum Type T
     //printf("%i\n",*((int*)element));
     int num = strlen((char*)key);
     set_node* dictionary_node = set_insert(table,key,num);
-    printf("HHHHHHHHHHHHHaaaaaaaaHHHHHHHH%llu",table->hashmap_size);
+    //printf("HHHHHHHHHHHHHaaaaaaaaHHHHHHHH%llu",table->hashmap_size);
     dictionary_node->value = element;
     dictionary_node->value_ype = TypeOfValue;
     return dictionary_node;
