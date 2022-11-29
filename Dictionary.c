@@ -99,33 +99,40 @@ int main (int argc,char** args)
     
     //printing all keys 
     print_set(new_set);
-    printf("Program executed succesfully");
-    return 0;
+    //printf("Program executed succesfully");
+    //return 0;
     // REHASHING NON FUNZIONA
 
-    /*
+   
     printf("\n##########################################\n");
     printf("Collision rehashing test, New Table created ");
     printf("\n##########################################\n");
 
     set_table* new_table_collision = set_table_new(2); // low size to increase likelyhood of collisions
-    //printf("\n table collision nodes = %llu",sizeof(new_table_collision->nodes)/sizeof(new_table_collision->nodes[0]));
-    //test(new_table_collision);
-    realloc_set_table(new_table_collision,20);
-    new_table_collision->nodes[1]->index = 700;
-    printf("\n %i",new_table_collision->nodes[1]->index);
-    printf("\nDEBUG ENDED");
-    return 0;
-    printf("\n single node size = %llu",sizeof(set_node));
-    printf("\n table size = %llu",sizeof(set_table));
-    printf("\n table collision size = %llu",sizeof(new_table_collision));
+    
+    // the parameters for the whole table rehashing are as follows:
+    // rehash the table if a collision occurrs in the same node twice
+    // rehash the table when the collision counter reaches 
+    
     int example_int = 1;
-    DictionaryInsert(new_table_collision,"test",&example_int,Int);
-    DictionaryInsert(new_table_collision,"ciao",&example_int,Int);
-    DictionaryInsert(new_table_collision,"sbam",&example_int,Int);
-    DictionaryInsert(new_table_collision,"asdf",&example_int,Int);
+    DictionaryInsert(new_table_collision,"ciao",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"sbam",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"asdf",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"test",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes2",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes3",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes4",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes5",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes6",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes7",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes8",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"tes9",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"ghjk",&example_int,Int); 
+    DictionaryInsert(new_table_collision,"boom",&example_int,Int); 
 
-    DictionaryInsert(new_table_collision,"ghjk",&example_int,Int);
+    print_set(new_table_collision);
+    printf("\nDEBUG ENDED\n");
+    return 0;
 
 
 
@@ -137,7 +144,6 @@ int main (int argc,char** args)
     return 0;
     example_int++;
     example_int++;
-    DictionaryInsert(new_table_collision,"boom",&example_int,Int);
     example_int++;
     DictionaryInsert(new_table_collision,"lmao",&example_int,Int);
 
@@ -146,6 +152,6 @@ int main (int argc,char** args)
     printf("Program executed succesfully");
 
     //set_table* new_set_REHASHING = set_table_new(100);
-    */
+    
     
 }

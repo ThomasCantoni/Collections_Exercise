@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+static float rehash_treshold = 0.75; 
+// if the table reaches 75% capacity then it rehashes everything
+
+static float rehash_multiplier= 1.66; 
+// if the rehashed table had 100 nodes it will be rebuilt with 166 nodes
  enum Type
 {
     /* 
@@ -49,7 +54,10 @@ typedef struct set_table
 //     }
 //     return hash;
 // }
-set_table* rehash_all_entries(set_table* received);
+set_table* rehash_all_entries2(set_table* received);
+
+
+
 int GetDigitNumber(int number)
 {
     int count=0;
@@ -114,21 +122,9 @@ struct set_table *set_table_new(const size_t hashmap_size)
     return table;
 }
 
-set_table* realloc_set_table(set_table* to_extend, int node_number)
+void print_set2(set_table* to_print,int show_NULLs)
 {
-    ///set_table* received = to_extend;
-    size_t new_size = node_number*sizeof(set_node);
-    //table->nodes = calloc(table->hashmap_size, sizeof(struct set_node *));
-    to_extend->nodes = realloc(to_extend->nodes,new_size);
-    //printf("AAAAAAAAAAAAAAAAAAAAAAA");
-    to_extend->hashmap_size = new_size;
-    
-    //printf("\n New size %llu  and actual hashmap size %llu",to_extend->hashmap_size,sizeof(to_extend->nodes));
-    return to_extend;
-}
-void print_set(set_table* to_print)
-{
-    
+    printf("\n table size : %i \n",(int)to_print->hashmap_size);
     for (int i=0;i<(int)to_print->hashmap_size;i++)
     {
 
@@ -142,7 +138,6 @@ void print_set(set_table* to_print)
 
             printf("Key at Index %i : %s  with internal node index: %i \n",i,(char*)current_set_node->key,current_set_node->index); 
             printf("Current node pointer %p \n",current_set_node); 
-
             if(current_set_node->next)
             {
                 set_node* next_node = current_set_node->next;
@@ -155,10 +150,19 @@ void print_set(set_table* to_print)
                  printf(" Next node is NULL, which means no collision occurred with this key\n\n"); 
             }
 
+
+        }
+        else if(show_NULLs >0)
+        {
+            printf("Main node at index %i was null \n",i); 
         }
 
         
     }
+}
+void print_set(set_table* to_print)
+{
+    print_set2(to_print,0);
 }
 
 set_node* search_by_key(set_table* to_examine,char* key_to_find)
@@ -185,8 +189,8 @@ void remove_by_key(set_table* table,void* key_to_remove)
        {
 
             set_node* replacer = node_to_remove->next;
-            printf("\nCRASH POINT 1%s : HASHMAP %i\n",(char*)key_to_remove,(int)table->hashmap_size);
-            printf("Removing collided node %p and replacing it with failsafe node: %p \n",(char*)key_to_remove,replacer->key);
+            //printf("\nCRASH POINT 1%s : HASHMAP %i\n",(char*)key_to_remove,(int)table->hashmap_size);
+            printf("\nRemoving collided node %p and replacing it with failsafe node: %p \n",(char*)key_to_remove,replacer->key);
 
             *node_to_remove = *replacer;
             node_to_remove->next = NULL;
@@ -194,7 +198,7 @@ void remove_by_key(set_table* table,void* key_to_remove)
        }
        else
        {
-         printf("\nCRASH POINT 2%s : HASHMAP %i\n",(char*)key_to_remove,(int)table->hashmap_size);
+         //printf("\nCRASH POINT 2%s : HASHMAP %i\n",(char*)key_to_remove,(int)table->hashmap_size);
          free(table->nodes[index]);
          table->nodes[index] = NULL;
          printf("Key removed: %s \n",(char*)key_to_remove);
@@ -207,7 +211,7 @@ struct set_node *set_insert(struct set_table *table,  void *key, const size_t ke
 {
     size_t hash = djb33x_hash(key);
     size_t index = hash % table->hashmap_size;
-    printf("\n INDEX CALCULATED %i\n",(int)index);
+    printf("\n Index of new item with key %s : %i\n",(char*)key,(int)index);
     
     struct set_node *head = table->nodes[index];
     if (!head)  //if no collision then proceed normally
@@ -223,42 +227,32 @@ struct set_node *set_insert(struct set_table *table,  void *key, const size_t ke
         table->nodes[index]->index = index;
         return table->nodes[index];
     }
-    
     if(check_duplicate(table,key)>0)
     {
         printf("\n Duplicate key detected!   %s \n " , (char*)key);
         return NULL;
     }
+    
     table->collision_counter ++;
     printf("\nCOLLISION DETECTED AT INDEX %i !\n",(int)index);
     printf("\nCOLLISION COUNTER : %i !\n\n",(int)table->collision_counter);
+    if(head->next || table->collision_counter >= (float)(table->hashmap_size*rehash_treshold))
+    {
+         printf("\nToo many collisions found in the dictionary, rehashing all entries\n");
+         printf("\n hashmap size : %i and collision counter %i\n",(int)table->hashmap_size,table->collision_counter);
+
+         //table = rehash_all_entries(table);
+         rehash_all_entries2(table);
+         return set_insert(table,key,key_len);
+         
+         //index = calculate_index(table,key);
+         
+
+    }
 
 
-    // if(&table->nodes[index])
-    // {   //collision!!!!!!!!!
-    //     for (size_t i = 0; i < table->hashmap_size; i++)
-    //     {
-    //         if(!table->nodes[i]) 
-    //         // if the memory slot at the index 'i' of the set is free, 
-    //         // then 'i' becomes the new index of whatever key i need to insert
-    //         {
-    //             index = i;
-                
-    //             printf("New free index found at %i \n",(int)index);
-    //             break;
-    //         }
-    //     }
-        
-    // }
-   // head = table->nodes[index];
-   if(head->next || table->collision_counter>(int)(table->hashmap_size*0.75))
-   {
-        printf("\nToo many collisions found in the dictionary, rehashing all entries\n");
-        //table = rehash_all_entries(table);
-        rehash_all_entries(table);
-        printf("HHHHHHHHHHHHHHHHHHHHHHHHHH%llu",table->hashmap_size);
-
-   }
+    
+    head = table->nodes[index];
     struct set_node *new_item = malloc(sizeof(struct set_node));
     if (!new_item)
     {
@@ -279,27 +273,94 @@ struct set_node *set_insert(struct set_table *table,  void *key, const size_t ke
     printf("NEW ITEM PTR %p \n",new_item);
     return tail;
 }
+set_table* realloc_set_table(set_table* to_extend, int node_number)
+{
+    ///set_table* received = to_extend;
+    int old_size = to_extend->hashmap_size;
+    size_t new_size = 1+ node_number*sizeof(set_node);
+    //table->nodes = calloc(table->hashmap_size, sizeof(struct set_node *));
+    set_node** old_node_ptr = to_extend->nodes;
+    to_extend->nodes  = realloc(to_extend->nodes,new_size);
+    //printf("\n %s ",(char*)to_extend->nodes[old_size +1]->key);
+    printf ("\n old size : %d  \n",old_size);
+
+    for (int i = 0; i < old_size; i++)
+    {
+        //printf("\n MANNAGGIA %s \n",to_extend->nodes[i]-> key);
+       *to_extend->nodes[i] = *old_node_ptr[i];
+       printf ("\n nodes processed: %d of %d \n",(int)i,node_number);
+    }
+    
+    free(*old_node_ptr);
+    //printf("\nAAAAAAAAAAAAAAAAAAAAAAA   %i",to_extend->nodes[new_size]);
+    to_extend->hashmap_size = new_size;
+    
+    //printf("\n New size %llu  and actual hashmap size %llu",to_extend->hashmap_size,sizeof(to_extend->nodes));
+    return to_extend;
+}
+set_table* rehash_all_entries2(set_table* to_rehash)
+{
+    ///set_table* received = to_extend;
+    int old_size = to_rehash->hashmap_size;
+    int new_node_number = old_size * rehash_multiplier;
+    size_t new_size =new_node_number*sizeof(set_node);
+    printf("\n old pointer =  %p",to_rehash->nodes);
+    //table->nodes = calloc(table->hashmap_size, sizeof(struct set_node *));
+    set_node** old_node_ptr = to_rehash->nodes;
+    to_rehash->nodes  = calloc(new_node_number,new_size);
+    to_rehash->hashmap_size = (int) new_node_number;
+    printf("\n new pointer =  %p with new node: %i \n",to_rehash->nodes,new_node_number);
+    for (int i = 0; i < old_size; i++)
+    {
+        printf("\n Moving all old nodes to new allocation. Loop number %i",i);
+       // to_rehash->nodes[i] = old_node_ptr[i];
+        set_node* to_move = old_node_ptr[i];
+        if(to_move)
+        {
+            set_insert(to_rehash,to_move->key,to_move->key_len);
+            
+            set_node* failsafe_key = to_move->next;
+            if(failsafe_key)
+            {
+                set_insert(to_rehash,failsafe_key->key,failsafe_key->key_len);
+            }
+
+
+        }
+    }
+    to_rehash->collision_counter =0;
+    free(old_node_ptr);
+    return to_rehash;
+}
 set_table* rehash_all_entries(set_table* to_rehash)
 {
     //set_table* to_rehash = received;
-    size_t original_size = to_rehash->hashmap_size;
+    int original_size = to_rehash->hashmap_size;
     
     size_t new_size = (original_size*1.5);
     realloc_set_table(to_rehash,new_size);
     printf("\n !!!! table collision nodes = %llu",sizeof(to_rehash->nodes)/sizeof(to_rehash->nodes[0]));
     //printf("\n !!!!!!!!!new size %llu",to_rehash->hashmap_size);
     //i extend the dictionary by fifty percent of it's current length 
-    for (size_t i = 0; i < original_size; i++)
+    for (int i = 0; i < original_size; i++)
     {
-        set_node* to_move_elsewhere = to_rehash->nodes[i];
-        if(!to_move_elsewhere) // if the node i want to move doesn't exist then i just skip a loop
-        {continue;}
-        //printf("\nCRASH POINT %s \n",(char*)to_move_elsewhere->key);
-        remove_by_key(to_rehash,to_move_elsewhere->key);
+        if(to_rehash->nodes[i]) // if the node i want to move doesn't exist then i just skip a loop
+        {
+            set_node* to_move_elsewhere = to_rehash->nodes[i];
+            //printf("\nCRASH POINT %s \n",(char*)to_move_elsewhere->key);
+            printf("\n %i CRASH POINT CRASH POINT CRASH POINT CRASH POINT CRASH POINT \n",i);
+            //printf("\n %s - %i \n",to_move_elsewhere->key,to_move_elsewhere->index);
 
-        set_node* node_inserted = set_insert(to_rehash,to_move_elsewhere->key,to_move_elsewhere->key_len);
-        if(node_inserted)
-            node_inserted->value = to_move_elsewhere->value;
+            remove_by_key(to_rehash,to_move_elsewhere->key);
+
+            set_node* node_inserted = set_insert(to_rehash,to_move_elsewhere->key,to_move_elsewhere->key_len);
+            if(node_inserted)
+            {
+                    node_inserted->value = to_move_elsewhere->value;
+
+            }
+
+        }
 
     }
     return to_rehash;
